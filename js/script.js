@@ -1,9 +1,8 @@
 let accessToken = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsImp0aSI6IjQ5ZjcyMWM2YzY2ZDA2MmFhYzIwNDZlOTZmMzAwNmI3NWZlNWMzOTFiOGRlMzhhNDgxNGZkMTAyOWRlNzg2YThjNzM0NGZjY2MwM2ZiMzBiIn0.eyJhdWQiOiI2YmM4MTBhMi01YmY2LTQxMjctOTUwNS05MjVjNTc4NTc3ZTMiLCJqdGkiOiI0OWY3MjFjNmM2NmQwNjJhYWMyMDQ2ZTk2ZjMwMDZiNzVmZTVjMzkxYjhkZTM4YTQ4MTRmZDEwMjlkZTc4NmE4YzczNDRmY2NjMDNmYjMwYiIsImlhdCI6MTcyNjgxNjQxMCwibmJmIjoxNzI2ODE2NDEwLCJleHAiOjE3MjY5MDI4MTAsInN1YiI6IjExNTQ2MTM0IiwiZ3JhbnRfdHlwZSI6IiIsImFjY291bnRfaWQiOjMxOTYyMjM4LCJiYXNlX2RvbWFpbiI6ImFtb2NybS5ydSIsInZlcnNpb24iOjIsInNjb3BlcyI6WyJwdXNoX25vdGlmaWNhdGlvbnMiLCJmaWxlcyIsImNybSIsImZpbGVzX2RlbGV0ZSIsIm5vdGlmaWNhdGlvbnMiXSwiaGFzaF91dWlkIjoiMWEzNTc2NmYtMzJmNi00YmI1LWJjOWYtNzA3NzI5MTMyZjIxIiwiYXBpX2RvbWFpbiI6ImFwaS1iLmFtb2NybS5ydSJ9.cJHHXxITCg6lBtqNq76IVyGyAHD4FrV-DRIsw6xxpyy83XtsNnB7uzBg3FfBmURWXNxEEjP2GvHGoq0YPBK274GgnLbuSTriLGoC6H1Tpb6GkE1TL3ydVfpisrBwx7n1TEBimQFKmZR9YFK62qxRprmIU1kwvfPVnZNsgKEdiUln6v0TN3aAk4pKsGAuuRJtZgYRVeDv1LutQsyr43qvGe_gQlD549DABHtrh_PRgOnEm-1_4thRMpIsDPXw4tVU-nRN4hfThTY5laLj5CTC4pDP18LOX6gdqxpjFKXwsT9ZPPYBeZzqEoNwZ141gGzdzCnOC6smZPuMJb9o2P2Jwg'; // Токен доступа amoCRM
-const subdomain = 'kuchevanton'; // Ваш поддомен
+const subdomain = 'kuchevanton';
 const dealsTable = document.querySelector('#dealsTable tbody');
 let expandedDeal = null;
 
-// Функция для выполнения запросов к API amoCRM
 async function fetchDeals(page = 1, limit = 3) {
     const response = await fetch(`https://${subdomain}.amocrm.ru/api/v4/leads?page=${page}&limit=${limit}`, {
         headers: {
@@ -17,12 +16,11 @@ async function fetchDeals(page = 1, limit = 3) {
     return await response.json();
 }
 
-// Функция для рендеринга сделки
 function renderDeal(deal) {
     const tr = document.createElement('tr');
-    tr.dataset.name = deal.name; // Сохраняем имя сделки
-    tr.dataset.price = deal.price; // Сохраняем бюджет сделки
-    tr.dataset.id = deal.id; // Сохраняем ID сделки
+    tr.dataset.name = deal.name; 
+    tr.dataset.price = deal.price; 
+    tr.dataset.id = deal.id; 
     tr.innerHTML = `
         <td>${deal.name}</td>
         <td>${deal.price}</td>
@@ -32,12 +30,10 @@ function renderDeal(deal) {
     dealsTable.appendChild(tr);
 }
 
-// Ограничение запросов не более 3 раз в секунду
 let currentPage = 1;
 let intervalId = null;
 
-// Функция для получения сделок с лимитом
-let errorCount = 0; // Счетчик ошибок
+let errorCount = 0;
 
 function fetchDealsWithLimit() {
     intervalId = setInterval(async () => {
@@ -50,7 +46,7 @@ function fetchDealsWithLimit() {
             }
             deals._embedded.leads.forEach(renderDeal);
             currentPage++;
-            errorCount = 0; // Сброс счетчика ошибок при успешном запросе
+            errorCount = 0;
         } catch (error) {
             errorCount++;
             console.error('Ошибка при получении сделок:', error);
@@ -63,9 +59,8 @@ function fetchDealsWithLimit() {
 }
 
 
-// Функция для получения детальной информации по сделке
 async function fetchDealDetails(dealId, tr) {
-    // Закрываем открытую карточку, если есть
+
     if (expandedDeal !== null && expandedDeal !== dealId) {
         const previousRow = document.querySelector(`tr[data-id="${expandedDeal}"]`);
         if (previousRow) {
@@ -78,7 +73,7 @@ async function fetchDealDetails(dealId, tr) {
     }
 
     if (expandedDeal === dealId) {
-        expandedDeal = null; // Закрыть текущую сделку
+        expandedDeal = null;
         tr.innerHTML = `
             <td>${tr.dataset.name}</td>
             <td>${tr.dataset.price}</td>
@@ -89,7 +84,6 @@ async function fetchDealDetails(dealId, tr) {
     
     expandedDeal = dealId;
 
-    // Показываем спиннер
     tr.innerHTML = '<td colspan="3">Загрузка...</td>';
 
     const response = await fetch(`https://${subdomain}.amocrm.ru/api/v4/leads/${dealId}`, {
@@ -106,7 +100,6 @@ async function fetchDealDetails(dealId, tr) {
     renderDealDetails(dealId, dealDetails, tr);
 }
 
-// Функция рендеринга деталей сделки
 function getNearestTask(dealDetails) {
     if (dealDetails.closest_task_at && dealDetails.closest_task_at > 0) {
         return new Date(dealDetails.closest_task_at * 1000); 
@@ -118,7 +111,7 @@ function getNearestTask(dealDetails) {
 function renderDealDetails(dealId, dealDetails, tr) {
     const nearestTaskDate = getNearestTask(dealDetails);
     let formattedDate = 'Нет задач';
-    let circleColor = 'red'; // По умолчанию красный цвет
+    let circleColor = 'red'; 
 
     if (nearestTaskDate) {
         const today = new Date();
@@ -130,15 +123,14 @@ function renderDealDetails(dealId, dealDetails, tr) {
         formattedDate = `${taskDate.getDate().toString().padStart(2, '0')}.${(taskDate.getMonth() + 1).toString().padStart(2, '0')}.${taskDate.getFullYear()}`;
 
         if (taskDate < today) {
-            circleColor = 'red'; // Просроченная задача
+            circleColor = 'red';
         } else if (taskDate.toDateString() === today.toDateString()) {
-            circleColor = 'green'; // Задача на сегодня
+            circleColor = 'green';
         } else {
             circleColor = 'yellow';
         }
     }
 
-    // Обновляем строку с деталями сделки
     tr.innerHTML = `
         <td colspan="3">
             Название: ${dealDetails.name}<br>
@@ -154,5 +146,4 @@ function renderDealDetails(dealId, dealDetails, tr) {
     `;
 }
 
-// Запуск получения сделок с лимитом
 fetchDealsWithLimit();
