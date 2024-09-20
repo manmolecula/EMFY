@@ -1,0 +1,16 @@
+/* Пример стилей таблицы */
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th, td {
+    border: 1px solid #ccc;
+    padding: 8px;
+    text-align: left;
+}
+
+svg {
+    width: 20px;
+    height: 20px;
+}
